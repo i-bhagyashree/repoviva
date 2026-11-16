@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { btnGhost, btnPrimary, ScoreBar } from "../components/ui";
 import { useAuth } from "../lib/auth";
+import { STATIC } from "../lib/config";
 import { Link } from "../lib/router";
 
 const FEATURES = [
@@ -49,7 +50,9 @@ const FAQ = [
   },
   {
     q: "Is my code stored?",
-    a: "Only the finished report is saved to your account. Your source code is read from GitHub for the review and not kept.",
+    a: STATIC
+      ? "No. Your code is read from GitHub inside your browser, and reports are saved only in your browser."
+      : "Only the finished report is saved to your account. Your source code is read from GitHub for the review and not kept.",
   },
   {
     q: "Which repos work?",

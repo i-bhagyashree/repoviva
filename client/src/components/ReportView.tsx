@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { STATIC } from "../lib/config";
 import type { Report, SavedReport } from "../lib/types";
 import { QuestionCard } from "./QuestionCard";
 import { Chip, ScoreBar, scoreColor, Section } from "./ui";
@@ -52,7 +53,8 @@ export function ReportView({ saved, readOnly = false }: { saved: SavedReport; re
       {saved.engine === "builtin" && !readOnly && (
         <p className="rounded-xl border border-sky-400/40 bg-sky-500/10 p-4 text-sm text-sky-200 print:hidden">
           <strong>Quick check.</strong> This review comes from RepoViva's built-in rules (no AI). It finds common
-          problems but cannot judge your design. Add ANTHROPIC_API_KEY to server/.env for a deeper AI review.
+          problems but cannot judge your design.
+          {!STATIC && " Add ANTHROPIC_API_KEY to server/.env for a deeper AI review."}
         </p>
       )}
 
