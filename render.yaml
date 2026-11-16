@@ -1,0 +1,21 @@
+# One-click deploy on Render (https://render.com): New > Blueprint > pick this repo.
+# Builds the website and the API, then runs them as one web service.
+services:
+  - type: web
+    name: repoviva
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && npm install --include=dev --prefix server && npm install --include=dev --prefix client && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: NODE_VERSION
+        value: "22"
+      # Optional: raises the GitHub limit from 60 to 5000 requests/hour.
+      - key: GITHUB_TOKEN
+        sync: false
+      # Optional: deeper AI reviews. The app works fully without it.
+      - key: ANTHROPIC_API_KEY
+        sync: false

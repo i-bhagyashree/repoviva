@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0b1020;
+  color: #e2e8f0;
+}
+
+select option {
+  background: #141a2e;
+}
+
+/* Print / Save as PDF: keep the dark report colours. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
