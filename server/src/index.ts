@@ -151,7 +151,7 @@ app.post("/api/analyze", requireAuth, async (req, res) => {
     return;
   }
 
-  const snap = await fetchRepo(ref);
+  const snap = await fetchRepo(ref, process.env.GITHUB_TOKEN);
   // With an API key Claude reviews the code; without one the built-in rule engine does.
   const engine = hasClaudeCredentials() ? "ai" : "builtin";
   const report = engine === "ai" ? await reviewRepo(snap) : analyzeRepo(snap);

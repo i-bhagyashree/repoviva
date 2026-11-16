@@ -2,16 +2,17 @@ import { useState } from "react";
 import { ReportView } from "../components/ReportView";
 import { btnGhost, btnPrimary, ErrorBox, Spinner } from "../components/ui";
 import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
+import { STATIC } from "../lib/config";
+import { makeShareUrl } from "../lib/share";
 import { downloadFile, reportToMarkdown } from "../lib/export";
 import { Link, navigate } from "../lib/router";
 import type { StoredReport } from "../lib/types";
 import { useApi } from "../lib/useApi";
 
-export function shareUrl(id: string) {
-  return `${window.location.origin}${window.location.pathname}#/share/${id}`;
-}
 
 export function ReportPage({ id }: { id: string }) {
+  const { user } = useAuth();
   const { data: saved, error, loading, setData } = useApi<StoredReport>(`/api/reports/${id}`);
   const all = useApi<StoredReport[]>("/api/reports");
   const [busy, setBusy] = useState<string | null>(null);
@@ -74,12 +75,13 @@ export function ReportPage({ id }: { id: string }) {
   };
 
   async function copyLink() {
+    const link = await makeShareUrl(saved!, user?.name ?? "A RepoViva user");
     try {
-      await navigator.clipboard.writeText(shareUrl(saved!.id));
+      await navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      prompt("Copy this link:", shareUrl(saved!.id));
+      prompt("Copy this link:", link);
     }
   }
 
@@ -115,28 +117,39 @@ export function ReportPage({ id }: { id: string }) {
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm">
-          <label className="flex cursor-pointer items-center gap-2 text-slate-200">
-            <input
-              type="checkbox"
-              checked={saved.shared}
-              onChange={toggleShare}
-              disabled={busy !== null}
-              className="h-4 w-4 accent-indigo-500"
-            />
-            Public share link
-          </label>
-          {saved.shared ? (
-            <>
-              <code className="min-w-0 flex-1 truncate text-xs text-slate-400">{shareUrl(saved.id)}</code>
-              <button onClick={copyLink} className="font-medium text-indigo-300 hover:text-indigo-200">
-                {copied ? "Copied!" : "Copy link"}
-              </button>
-            </>
-          ) : (
-            <span className="text-slate-500">Off: only you can see this report.</span>
-          )}
-        </div>
+        {STATIC ? (
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm">
+            <span className="flex-1 text-slate-400">
+              Share a read-only copy: the link contains the report itself, so anyone with it can view it.
+            </span>
+            <button onClick={copyLink} className="font-medium text-indigo-300 hover:text-indigo-200">
+              {copied ? "Copied!" : "Copy share link"}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm">
+            <label className="flex cursor-pointer items-center gap-2 text-slate-200">
+              <input
+                type="checkbox"
+                checked={saved.shared}
+                onChange={toggleShare}
+                disabled={busy !== null}
+                className="h-4 w-4 accent-indigo-500"
+              />
+              Public share link
+            </label>
+            {saved.shared ? (
+              <>
+                <code className="min-w-0 flex-1 truncate text-xs text-slate-400">#/share/{saved.id}</code>
+                <button onClick={copyLink} className="font-medium text-indigo-300 hover:text-indigo-200">
+                  {copied ? "Copied!" : "Copy link"}
+                </button>
+              </>
+            ) : (
+              <span className="text-slate-500">Off: only you can see this report.</span>
+            )}
+          </div>
+        )}
 
         {previous && (
           <p

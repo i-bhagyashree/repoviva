@@ -65,7 +65,13 @@ All endpoints except health, signup, login and share need `Authorization: Bearer
 | `POST /api/feedback` | `{ question, goodAnswerCovers, projectSummary, answer, reportId?, topic? }` | score and feedback |
 | `GET /api/practice` | none | your graded answers |
 
-## Deploy (free, on Render)
+## Live demo (GitHub Pages)
+
+https://i-bhagyashree.github.io/repoviva/
+
+This version runs entirely in your browser: reviews use the built-in engine, and your account and reports are saved in your browser only (`localStorage`). Share links contain the report itself. Every push to `main` redeploys it via `.github/workflows/deploy-pages.yml`.
+
+## Deploy with the server (free, on Render)
 
 1. Push this repo to GitHub.
 2. On https://render.com: **New > Blueprint**, pick the repo. `render.yaml` sets everything up.

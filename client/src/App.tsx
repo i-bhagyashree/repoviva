@@ -24,6 +24,7 @@ const TITLES: Record<string, string> = {
   compare: "Compare · RepoViva",
   profile: "Profile · RepoViva",
   share: "Shared report · RepoViva",
+  s: "Shared report · RepoViva",
 };
 
 function Pages() {
@@ -65,7 +66,9 @@ function Pages() {
     case "profile":
       return <Profile />;
     case "share":
-      return <SharedReport id={parts[1] ?? ""} />;
+      return <SharedReport key={parts[1]} id={parts[1] ?? ""} />;
+    case "s":
+      return <SharedReport key={parts[1]} encoded={parts[1] ?? ""} />;
     default:
       return (
         <div className="mx-auto max-w-xl px-4 py-24 text-center">

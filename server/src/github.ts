@@ -16,11 +16,10 @@ const CONFIG_FILES =
 const README = /(^|\/)readme(\.md|\.txt)?$/i;
 
 export class GitHubError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-  ) {
+  status: number;
+  constructor(message: string, status: number) {
     super(message);
+    this.status = status;
   }
 }
 
@@ -55,14 +54,12 @@ export function parseRepoUrl(input: string): RepoRef | null {
   return { owner: m[1], name: m[2] };
 }
 
-async function api<T>(path: string): Promise<T> {
+async function api<T>(path: string, token?: string): Promise<T> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
     "User-Agent": "repoviva",
   };
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  }
+  if (token) headers.Authorization = `Bearer ${token}`;
   let res: Response;
   try {
     res = await fetch(`https://api.github.com${path}`, {
@@ -77,7 +74,7 @@ async function api<T>(path: string): Promise<T> {
   }
   if (res.status === 403 || res.status === 429) {
     throw new GitHubError(
-      "GitHub rate limit reached. Try again later, or add a GITHUB_TOKEN to server/.env.",
+      "GitHub rate limit reached (60 requests per hour without a token). Try again later.",
       429,
     );
   }
@@ -93,17 +90,18 @@ function priority(path: string): number {
   return 2 + depth + (isTest ? 5 : 0);
 }
 
-export async function fetchRepo(ref: RepoRef): Promise<RepoSnapshot> {
+/** Works in Node and in the browser. `token` (optional) raises GitHub's rate limit. */
+export async function fetchRepo(ref: RepoRef, token?: string): Promise<RepoSnapshot> {
   const slug = `${ref.owner}/${ref.name}`;
   const info = await api<{
     default_branch: string;
     description: string | null;
     html_url: string;
-  }>(`/repos/${slug}`);
+  }>(`/repos/${slug}`, token);
 
   const treeRes = await api<{
     tree: { path: string; type: string; size?: number }[];
-  }>(`/repos/${slug}/git/trees/${encodeURIComponent(info.default_branch)}?recursive=1`);
+  }>(`/repos/${slug}/git/trees/${encodeURIComponent(info.default_branch)}?recursive=1`, token);
 
   const allBlobs = treeRes.tree.filter((e) => e.type === "blob");
   const blobs = allBlobs.filter((e) => !SKIP_DIRS.test(e.path) && !SKIP_FILES.test(e.path));

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { btnPrimary, ErrorBox, inputCls } from "../components/ui";
 import { useAuth } from "../lib/auth";
+import { STATIC } from "../lib/config";
 import { Link, navigate } from "../lib/router";
 
 export function Login({ mode, next }: { mode: "login" | "signup"; next: string }) {
@@ -139,6 +140,13 @@ export function Login({ mode, next }: { mode: "login" | "signup"; next: string }
             {loading ? "Please wait..." : isSignup ? "Create account" : "Log in"}
           </button>
         </form>
+
+        {STATIC && (
+          <p className="mt-4 rounded-lg bg-white/5 p-3 text-xs text-slate-400">
+            Your account and reports are saved privately in <strong>this browser</strong>. Use the same browser to
+            log in again.
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-slate-400">
           {isSignup ? "Already have an account? " : "New to RepoViva? "}
